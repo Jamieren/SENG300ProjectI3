@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.tdc.IComponent;
 import com.tdc.IComponentObserver;
+import com.tdc.banknote.IBanknoteDispenser;
 import com.tdc.coin.Coin;
 import com.tdc.coin.CoinDispenserObserver;
 import com.tdc.coin.ICoinDispenser;
@@ -26,13 +27,20 @@ import com.thelocalmarketplace.software.logic.CentralStationLogic;
  * @author Daniel Yakimenka (10185055)
  */
 public class CoinDispenserController extends AbstractLogicDependant implements CoinDispenserObserver {
+	/** 
+	 * Percentage full/empty to trigger respective warnings.
+	 * For example, when set to 20 (%), the full warning or empty warning 
+	 * will be triggered when there >= 8 or <= 2 banknotes respectively 
+	 * in a dispenser with a maximum capacity of 10. 
+	 */
+	static double warnAtPercentage = 20; //this can be modified by the customer as needed
+	ICoinDispenser dispenser;
 	
 	/**
 	 * List of available coins of this denomination
 	 */
 	private List<Coin> available;
 
-	
 	/**
 	 * Base constructor
 	 * @param logic Is the reference to the logic
@@ -48,10 +56,20 @@ public class CoinDispenserController extends AbstractLogicDependant implements C
 		
 		this.available = new ArrayList<>();
 		
+		dispenser = this.logic.hardware.getCoinDispensers().get(denomination);
+		
 		// Attach self to specific dispenser corresponding to its denomination
-
-		this.logic.hardware.getCoinDispensers().get(denomination).attach(this);
-		//this.logic.hardware.coinDispensers.get(denomination).attach(this);
+		dispenser.attach(this);
+	}
+	
+	public boolean shouldWarnFull() {
+		if(dispenser.getCapacity() - available.size() >= dispenser.getCapacity() * warnAtPercentage) return true;
+		return false;
+	}
+	
+	public boolean shouldWarnEmpty() {
+		if(available.size() <= dispenser.getCapacity() * warnAtPercentage) return true;
+		return false;
 	}
 	
 	/**
