@@ -26,8 +26,16 @@ import com.thelocalmarketplace.software.logic.CentralStationLogic;
  * @author Daniel Yakimenka (10185055)
  */
 public class BanknoteDispenserController extends AbstractLogicDependant implements BanknoteDispenserObserver {
-	
+	/** 
+	 * Percentage full/empty to trigger respective warnings.
+	 * For example, when set to 20 (%), the full warning or empty warning 
+	 * will be triggered when there >= 8 or <= 2 banknotes respectively 
+	 * in a dispenser with a maximum capacity of 10. 
+	 */
+	static double warnAtPercentage = 20; //this can be modified by the customer as needed
+	IBanknoteDispenser dispenser;
 	private List<Banknote> available;
+
 
 	public BanknoteDispenserController(CentralStationLogic logic, BigDecimal denomination) throws NullPointerException {
 		super(logic);
@@ -38,9 +46,20 @@ public class BanknoteDispenserController extends AbstractLogicDependant implemen
 		
 		this.available = new ArrayList<>();
 		
+		dispenser = this.logic.hardware.getBanknoteDispensers().get(denomination);
+		
 		// Attach self to specific dispenser corresponding to its denomination
-		this.logic.hardware.getBanknoteDispensers().get(denomination).attach(this);
-		//this.logic.hardware.banknoteDispensers.get(denomination).attach(this);
+		dispenser.attach(this);
+	}
+	
+	public boolean shouldWarnFull() {
+		if(dispenser.getCapacity() - available.size() >= dispenser.getCapacity() * warnAtPercentage) return true;
+		return false;
+	}
+	
+	public boolean shouldWarnEmpty() {
+		if(available.size() <= dispenser.getCapacity() * warnAtPercentage) return true;
+		return false;
 	}
 	
 	public List<Banknote> getAvailableBanknotes() {
