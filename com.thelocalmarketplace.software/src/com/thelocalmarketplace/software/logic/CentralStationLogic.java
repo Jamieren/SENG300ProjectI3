@@ -288,6 +288,7 @@ public class CentralStationLogic {
 		
 		this.stateLogic.gotoState(States.NORMAL);
 		this.sessionStarted = true;
+		predictIssues();
 	}
 	
 	/**
@@ -295,7 +296,21 @@ public class CentralStationLogic {
 	 */
 	public void stopSession() {
 		System.out.println("Session ended");
-		
 		this.sessionStarted = false;
+		predictIssues();
+	}
+	
+	public void predictIssues() {
+		//TODO put printer and ink warning checks in here
+	    for (Entry<BigDecimal, BanknoteDispenserController> entry : this.banknoteDispenserControllers.entrySet()) {
+	        final BanknoteDispenserController controller = entry.getValue();
+	        controller.shouldWarnEmpty(); //TODO interact with attendant station UI
+	        controller.shouldWarnFull(); //TODO interact with attendant station UI
+	    }
+	    for (Entry<BigDecimal, CoinDispenserController> entry : this.coinDispenserControllers.entrySet()) {
+	        final CoinDispenserController controller = entry.getValue();
+	        controller.shouldWarnEmpty(); //TODO interact with attendant station UI
+	        controller.shouldWarnFull(); //TODO interact with attendant station UI
+	    }
 	}
 }
