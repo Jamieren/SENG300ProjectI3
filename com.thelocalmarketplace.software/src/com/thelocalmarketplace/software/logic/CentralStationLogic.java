@@ -297,16 +297,14 @@ public class CentralStationLogic {
 	 * Marks the current self checkout session as inactive
 	 */
 	public void stopSession() {
-		//Alan: this check should happen after ending the session 
-		//as there is no need to disturb the customer at this point,
-		//but this is what the use case description outlines.
-		//I'll write a discussion post.
+		System.out.println("Session ended");
+		this.sessionStarted = false;
+		
+		//the session can be ended first as the issue prediction 
+		//is not relevant to the current customer
 		if(issuePredicted()) {
 			this.stateLogic.gotoState(States.BLOCKED);
-		} else {
-			System.out.println("Session ended");
-			this.sessionStarted = false;
-		}
+		} 
 	}
 	
 	public boolean issuePredicted() {
