@@ -283,34 +283,61 @@ public class CentralStationLogic {
 		if (this.isSessionStarted()) {
 			throw new InvalidStateSimulationException("Session already started");
 		}
-		
-		System.out.println("Session started");
-		
-		this.stateLogic.gotoState(States.NORMAL);
-		this.sessionStarted = true;
-		predictIssues();
+		if(issuePredicted()) {
+			this.stateLogic.gotoState(States.BLOCKED);
+		} else {
+			System.out.println("Session started");
+			this.stateLogic.gotoState(States.NORMAL);
+			this.sessionStarted = true;
+		}
+
 	}
 	
 	/**
 	 * Marks the current self checkout session as inactive
 	 */
 	public void stopSession() {
-		System.out.println("Session ended");
-		this.sessionStarted = false;
-		predictIssues();
+		//Alan: this check should happen after ending the session 
+		//as there is no need to disturb the customer at this point,
+		//but this is what the use case description outlines.
+		//I'll write a discussion post.
+		if(issuePredicted()) {
+			this.stateLogic.gotoState(States.BLOCKED);
+		} else {
+			System.out.println("Session ended");
+			this.sessionStarted = false;
+		}
 	}
 	
-	public void predictIssues() {
+	public boolean issuePredicted() {
+		boolean issueExists = false;
 		//TODO put printer and ink warning checks in here
+		
+		//Banknote dispenser checks
 	    for (Entry<BigDecimal, BanknoteDispenserController> entry : this.banknoteDispenserControllers.entrySet()) {
 	        final BanknoteDispenserController controller = entry.getValue();
-	        controller.shouldWarnEmpty(); //TODO interact with attendant station UI
-	        controller.shouldWarnFull(); //TODO interact with attendant station UI
+	        if(controller.shouldWarnEmpty()) {
+		        //TODO interact with attendant station UI
+	        	issueExists = true;
+	        }
+	        if(controller.shouldWarnFull()) {
+	        	//TODO interact with attendant station UI
+	        	issueExists = true;
+	        }
 	    }
+	    
+	    //Coin dispenser checks
 	    for (Entry<BigDecimal, CoinDispenserController> entry : this.coinDispenserControllers.entrySet()) {
 	        final CoinDispenserController controller = entry.getValue();
-	        controller.shouldWarnEmpty(); //TODO interact with attendant station UI
-	        controller.shouldWarnFull(); //TODO interact with attendant station UI
+	        if(controller.shouldWarnEmpty()) {
+		        //TODO interact with attendant station UI
+	        	issueExists = true;
+	        }
+	        if(controller.shouldWarnFull()) {
+	        	//TODO interact with attendant station UI
+	        	issueExists = true;
+	        }
 	    }
+	    return issueExists;
 	}
 }
