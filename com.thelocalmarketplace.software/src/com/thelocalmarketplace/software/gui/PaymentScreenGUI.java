@@ -16,8 +16,8 @@ public class PaymentScreenGUI {
     private JButton finishCheckoutButton;
     private JLabel totalPriceLabel;
     private JLabel itemsInCartLabel;
+    private JLabel selectPaymentLabel;
     private JList<String> cartItemList;
-    private DefaultListModel<String> cartListModel;
 
     public PaymentScreenGUI() {
         paymentPageFrame = new JFrame("The LocalMarketplace Self-Checkout Station");
@@ -27,13 +27,23 @@ public class PaymentScreenGUI {
 
         paymentPageFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         paymentPageFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        paymentPageFrame.setContentPane(paymentPagePanel);  // Set the content pane to the panel
+        paymentPageFrame.setContentPane(paymentPagePanel);
         paymentPageFrame.setVisible(true);
     }
-
     private void addWidgets() {
-        paymentPagePanel.setLayout(new GridLayout(1, 3));  // 1 row, 2 columns
+        paymentPagePanel.setLayout(new BorderLayout());
 
+        // top panel
+        JPanel topPanel = new JPanel();
+        selectPaymentLabel = new JLabel("Select Payment Method");  // Fix this line
+        selectPaymentLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        topPanel.add(selectPaymentLabel);
+        paymentPagePanel.add(topPanel, BorderLayout.NORTH);
+
+
+        // center panel (containing left and right panels)
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new GridLayout(1, 2));
 
         // left panel
         JPanel buttonsPanel = new JPanel();
@@ -52,26 +62,37 @@ public class PaymentScreenGUI {
         buttonsPanel.add(notifyAttendantButton);
         buttonsPanel.add(backToCartButton);
 
-        paymentPagePanel.add(buttonsPanel);
+        centerPanel.add(buttonsPanel);
 
         // right panel
         JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new GridLayout(10,1));
+        rightPanel.setLayout(new BorderLayout());
 
         finishCheckoutButton = new JButton("Finish Checkout");
+        finishCheckoutButton.setFont(new Font("Arial", Font.BOLD, 16));  
+        finishCheckoutButton.setPreferredSize(new Dimension(150, 50));
+        itemsInCartLabel = new JLabel("Items in cart:");
+        itemsInCartLabel.setFont(new Font("Arial", Font.BOLD, 15));
+
+        cartItemList = new JList<>();
+        cartItemList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+        cartItemList.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+        cartItemList.setVisibleRowCount(-1);
+
+        JPanel listPanel = new JPanel(new BorderLayout());
+        listPanel.add(cartItemList, BorderLayout.CENTER);
+        listPanel.add(itemsInCartLabel, BorderLayout.NORTH);
+
         totalPriceLabel = new JLabel("Total Price:");
-        itemsInCartLabel = new JLabel("Items in cart");
+        totalPriceLabel.setFont(new Font("Arial", Font.BOLD, 15));
 
-        cartListModel = new DefaultListModel<>();
-        cartItemList = new JList<>(cartListModel);
-        JScrollPane cartScrollPane = new JScrollPane(cartItemList);
-
-        rightPanel.add(itemsInCartLabel);
-        rightPanel.add(cartScrollPane, BorderLayout.SOUTH);
-        rightPanel.add(totalPriceLabel);
+        rightPanel.add(listPanel, BorderLayout.CENTER);
+        rightPanel.add(totalPriceLabel, BorderLayout.NORTH);
         rightPanel.add(finishCheckoutButton, BorderLayout.SOUTH);
 
-        paymentPagePanel.add(rightPanel);
+        centerPanel.add(rightPanel);
+
+        paymentPagePanel.add(centerPanel, BorderLayout.CENTER);
     }
 
     public static void main(String[] args) {
